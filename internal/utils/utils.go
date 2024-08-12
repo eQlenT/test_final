@@ -116,11 +116,11 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 	}
 	now, err = time.Parse("20060102", now.Format("20060102"))
 	if err != nil {
-		return "", fmt.Errorf("%s/nневерный формат now", err)
+		return "", fmt.Errorf("%s\nневерный формат now", err)
 	}
 	dateStart, err := time.Parse("20060102", date)
 	if err != nil {
-		return "", fmt.Errorf("%s/nневерный формат date", err)
+		return "", fmt.Errorf("%s\nневерный формат date", err)
 	}
 
 	var resDate time.Time
