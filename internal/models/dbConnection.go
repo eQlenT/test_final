@@ -99,9 +99,19 @@ func (c *DBConnection) CheckID(id int) error {
 // Возвращает:
 // - Ошибку, если во время удаления произошла ошибка. Если удаление выполнено успешно, возвращается nil
 func (c *DBConnection) Delete(id int) error {
-	_, err := c.db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
+	res, err := c.db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
 	if err != nil {
-		c.logger.Errorw("Error deleting task", "error", err)
+		c.logger.Errorw("error deleting task", "error", err)
+		return err
+	}
+	num, err := res.RowsAffected()
+	if err != nil {
+		c.logger.Errorw("error getting rows affected", "error", err)
+		return err
+	}
+	if num != 1 {
+		err = errors.New("no such id")
+		c.logger.Error(err)
 		return err
 	}
 	c.logger.Infof("Task with ID: %d was deleted", id)
@@ -140,9 +150,20 @@ func (c *DBConnection) Insert(task *Task) (int, error) {
 // Возвращает:
 // - Ошибку, если во время обновления произошла ошибка. Если обновление выполнено успешно, возвращается nil.
 func (c *DBConnection) Update(task *Task) error {
-	_, err := c.db.Exec(`UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?`,
+	res, err := c.db.Exec(`UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?`,
 		task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 	if err != nil {
+		c.logger.Errorw("error updating task", "error", err)
+		return err
+	}
+	num, err := res.RowsAffected()
+	if err != nil {
+		c.logger.Errorw("error getting rows affected", "error", err)
+		return err
+	}
+	if num != 1 {
+		err = errors.New("no such id")
+		c.logger.Error(err)
 		return err
 	}
 	c.logger.Infof("Task `%s` updated", task.Title)
